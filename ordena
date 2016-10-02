@@ -13,7 +13,7 @@ void ordena(int tam, int ordem, int tipo);
 void escreve(int tam, int ordem, int tipo, float tempo, int comp, int troca);
 
 FILE *arq;
-
+// OI LINDOS
 int main()
 {
     int i, j;
