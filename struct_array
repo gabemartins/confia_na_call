@@ -49,7 +49,7 @@ int main()
 
 
     // Teste
-    // printf ("%d",array[46].valor);
+    // printf ("%d",array[9600].ano);
 
 
     fclose(banco);
