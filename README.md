@@ -1,0 +1,465 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#define TAM 9600
+
+void ins_direta(int C[], int tam, int *comp, int *troca, float ck);
+void ins_direta_bb(int n, int vetbb[], int *comp, int *troca, float ck);
+void shellSort(int vet[], int size, int *comp, int *troca, float ck);
+void bubblesort(int vetor[], int tam, int *comp, int *troca, float ck);
+void quick(int vet[], int esq, int dir, int *comp, int *troca, float ck);
+void mergeSort(int vetor[], int posicaoInicio, int posicaoFim, int *comp, int *troca, float ck);
+void heapsort(int a[], int n, int *comp, int *troca, float ck);
+void ordena(int tam, int tipo);
+void escreve(int tam, int tipo, float tempo, int comp, int troca);
+
+typedef struct estrutura
+{
+    int valor;
+    int municipio;
+    int ano;
+} ESTRUTURA;
+
+FILE *dados;
+FILE *arq;
+
+int main()
+{
+    int i, j;
+    arq = fopen("resultados_confia_na_call.txt", "a");
+    if (!arq){
+        printf("Erro ao criar o arquivo resultados.txt!");
+        return -1;
+    }
+
+
+    for(i=0; i<7; i++)
+        {
+            ordena(100, i);
+            ordena(1000, i);
+            ordena(10000, i);
+            //ordena(1000000, j, i);
+            //ordena(10000000, j, i);
+        }
+
+    fclose(arq);
+
+    return 0;
+}
+
+void ins_direta(int C[], int tam, int *comp, int *troca, float ck)
+{
+    int i, j, chave;
+
+    for(j=1; j<tam; j++)
+    {
+        chave = C[j];
+        i = j-1;
+        while((i>=0)&&(C[i])>chave)
+        {
+            C[i+1] = C[i];
+            i--;
+            (*comp)++;
+            if((clock()-ck)>60000)
+                return;
+        }
+        (*comp)++;
+        C[i+1] = chave;
+        (*troca)++;
+        if((clock()-ck)>60000)
+                return;
+    }
+}
+
+void ins_direta_bb(int n, int vetbb[], int *comp, int *troca, float ck)
+{
+	int inf,sup;
+	int i,pivo;
+	int chave;
+
+	for (i=0;i<n;i++)
+    {
+		chave=vetbb[i+1];
+		inf=0;
+		sup=i;
+		while (sup!=inf)
+        {
+			(*comp)++;
+			pivo = (inf + sup)/2;
+			if (vetbb[pivo]>=chave)
+				sup=pivo;
+			else inf=pivo+1;
+            (*comp)++;
+            if((clock()-ck)>60000)
+                return;
+        }
+        (*comp)++;
+		if (vetbb[inf]>chave)
+        {
+			memmove(&vetbb[inf+1],&vetbb[inf],(i-inf+1)*sizeof(int));
+			(*troca)++;
+			vetbb[inf]=chave;
+			(*troca)++;
+        }
+		else
+        {
+			memmove(&vetbb[inf+2],&vetbb[inf+1],(i-inf)*sizeof(int));
+			(*troca)++;
+			vetbb[inf+1]=chave;
+			(*troca)++;
+        }
+        (*comp)++;
+        if((clock()-ck)>60000)
+                return;
+    }
+}
+
+void shellSort(int vet[], int size, int *comp, int *troca, float ck)
+{
+    int i , j , value;
+    int gap = 1;
+
+    while(gap < size)
+    {
+        gap = 3*gap+1;
+        if((clock()-ck)>60000)
+                return;
+    }
+    while ( gap > 1)
+    {
+        gap /= 3;
+        for(i = gap; i < size; i++)
+        {
+            value = vet[i];
+            j = i - gap;
+            while (j >= 0 && value < vet[j])
+            {
+                vet [j + gap] = vet[j];
+                j -= gap;
+                (*comp)++;
+                (*troca)++;
+                if((clock()-ck)>60000)
+                return;
+            }
+            (*comp)++;
+            vet [j + gap] = value;
+            (*troca)++;
+            if((clock()-ck)>60000)
+                return;
+        }
+        if((clock()-ck)>60000)
+                return;
+    }
+}
+
+void bubblesort(int vetor[], int tam, int *comp, int *troca, float ck)
+{
+    int i, j, temp;
+
+    for(i=tam-1; i>0; i--)
+    {
+        for(j=0; j<i; j++)
+        {
+            if(vetor[j]>vetor[j+1])
+            {
+                temp = vetor[j];
+                vetor[j] = vetor[j+1];
+                vetor[j+1] = temp;
+                (*troca)++;
+                (*troca)++;
+            }
+            (*comp)++;
+            if((clock()-ck)>60000)
+                return;
+        }
+        if((clock()-ck)>60000)
+                return;
+    }
+}
+
+void quick(int vet[], int esq, int dir, int *comp, int *troca, float ck)
+{
+    int pivo = esq,i,ch,j;
+    for(i=esq+1;i<=dir;i++)
+    {
+        j = i;
+        if(vet[j] < vet[pivo])
+        {
+            ch = vet[j];
+            while(j > pivo)
+            {
+                vet[j] = vet[j-1];
+                j--;
+                (*troca)++;
+                if((clock()-ck)>60000)
+                return;
+            }
+        vet[j] = ch;
+        (*troca)++;
+        pivo++;
+        }
+        (*comp)++;
+        if((clock()-ck)>60000)
+                return;
+    }
+    if(pivo-1 > esq)
+    {
+        quick(vet,esq,pivo-1, comp, troca, ck);
+    }
+    (*comp)++;
+    if(pivo+1 < dir)
+    {
+        quick(vet,pivo+1,dir, comp, troca, ck);
+    }
+    (*comp)++;
+ }
+
+void mergeSort(int vetor[], int posicaoInicio, int posicaoFim, int *comp, int *troca, float ck)
+{
+    int i, j, k, metadeTamanho, *vetorTemp;
+
+    if(posicaoInicio == posicaoFim) return;
+
+    metadeTamanho = (posicaoInicio + posicaoFim ) / 2;
+    mergeSort(vetor, posicaoInicio, metadeTamanho, comp, troca, ck);
+    mergeSort(vetor, metadeTamanho + 1, posicaoFim, comp, troca, ck);
+
+    i = posicaoInicio;
+    j = metadeTamanho + 1;
+    k = 0;
+    vetorTemp = (int *) malloc(sizeof(int) * (posicaoFim - posicaoInicio + 1));
+
+    while(i < metadeTamanho + 1 || j  < posicaoFim + 1)
+    {
+        if (i == metadeTamanho + 1 )
+        {
+            vetorTemp[k] = vetor[j];
+            j++;
+            k++;
+            (*troca)++;
+        }
+        else
+        {
+            if (j == posicaoFim + 1)
+            {
+                vetorTemp[k] = vetor[i];
+                i++;
+                k++;
+                (*troca)++;
+            }
+            else
+            {
+                if (vetor[i] < vetor[j])
+                {
+                    vetorTemp[k] = vetor[i];
+                    i++;
+                    k++;
+                    (*troca)++;
+                }
+                else
+                {
+                    vetorTemp[k] = vetor[j];
+                    j++;
+                    k++;
+                    (*troca)++;
+                }
+                (*comp)++;
+            }
+
+        }
+        if((clock()-ck)>60000)
+                return;
+
+    }
+    for(i = posicaoInicio; i <= posicaoFim; i++) {
+        vetor[i] = vetorTemp[i - posicaoInicio];
+        (*troca)++;
+        if((clock()-ck)>60000)
+                return;
+    }
+    free(vetorTemp);
+}
+
+void heapsort(int a[], int n, int *comp, int *troca, float ck)
+{
+    int i = n / 2, pai, filho, t;
+    for (;;)
+    {
+        if (i > 0)
+        {
+            i--;
+            t = a[i];
+        }
+        else
+        {
+            n--;
+            if (n == 0) return;
+            t = a[n];
+            a[n] = a[0];
+            (*troca)++;
+        }
+        pai = i;
+        filho = i * 2 + 1;
+        while (filho < n)
+        {
+            if ((filho + 1 < n)  &&  (a[filho + 1] > a[filho]))
+                filho++;
+            (*comp)++;
+            if (a[filho] > t)
+            {
+                a[pai] = a[filho];
+                (*troca)++;
+                pai = filho;
+                filho = pai * 2 + 1;
+            }
+            else
+            {
+                break;
+            }
+            (*comp)++;
+            if((clock()-ck)>60000)
+                return;
+        }
+      a[pai] = t;
+      (*troca)++;
+      if((clock()-ck)>60000)
+                return;
+   }
+}
+
+void ordena(int tam, int tipo)
+{
+    int i, (*comp) = 0, (*troca) = 0;
+    float inicio, fim, tempo;
+    ESTRUTURA array [TAM];
+
+    dados = fopen("banco_de_dados.bin", "rb");
+    if (!dados){
+        printf("Erro ao abrir o arquivo banco_de_dados.bin!");
+        return -1;
+    }
+
+    fread(array, sizeof(ESTRUTURA), TAM , dados );
+
+    switch(tipo)
+    {
+        case 0: {
+                inicio = clock();
+                ins_direta(array, tam, &comp, &troca, inicio);
+                fim = clock();
+                tempo = fim - inicio;
+                }
+                break;
+        case 1: {
+                inicio = clock();
+                ins_direta_bb(tam, array, &comp, &troca, inicio);
+                fim = clock();
+                tempo = fim - inicio;
+                }
+                break;
+        case 2: {
+                inicio = clock();
+                shellSort(array, tam, &comp, &troca, inicio);
+                fim = clock();
+                tempo = fim - inicio;
+                }
+                break;
+        case 3: {
+                inicio = clock();
+                bubblesort(array, tam, &comp, &troca, inicio);
+                fim = clock();
+                tempo = fim - inicio;
+                }
+                break;
+        case 4: {
+                inicio = clock();
+                quick(array, 0, tam-1, &comp, &troca, inicio);
+                fim = clock();
+                tempo = fim - inicio;
+                }
+                break;
+        case 5: {
+                inicio = clock();
+                mergeSort(array, 0, tam-1, &comp, &troca, inicio);
+                fim = clock();
+                tempo = fim - inicio;
+                }
+                break;
+        case 6: {
+                inicio = clock();
+                heapsort(array, tam, &comp, &troca, inicio);
+                fim = clock();
+                tempo = fim - inicio;
+                }
+                break;
+        default: break;
+    }
+
+    escreve(tam, tipo, tempo, comp, troca);
+}
+
+void escreve(int tam, int tipo, float tempo, int comp, int troca)
+{
+        if(tipo == 0)
+        {
+
+                 fprintf(arq, "insertionsort, randomico, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+                 fprintf(arq, "insertionsort, ordenado, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+                 fprintf(arq, "insertionsort, inverso, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+
+
+        }
+        if(tipo == 1)
+        {
+
+              fprintf(arq, "insertionsortbb, randomico, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+               fprintf(arq, "insertionsortbb, ordenado, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+                fprintf(arq, "insertionsortbb, inverso, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+
+        }
+        if(tipo == 2)
+        {
+
+                fprintf(arq, "shellsort, randomico, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+                fprintf(arq, "shellsort, ordenado, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+                fprintf(arq, "shellsort, inverso, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+
+
+        }
+        if(tipo == 3)
+        {
+
+                fprintf(arq, "bubblesort, randomico, %d, %ul, %ul, %f\n", tam, troca, comp, tempo); ;
+                fprintf(arq, "bubblesort, ordenado, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+                fprintf(arq, "bubblesort, inverso, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+
+
+        }
+        if(tipo == 4)
+        {
+
+                 fprintf(arq, "quicksort, randomico, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+                 fprintf(arq, "quicksort, ordenado, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+                 fprintf(arq, "quicksort, inverso, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+
+
+        }
+        if(tipo == 5)
+        {
+
+                fprintf(arq, "mergesort, randomico, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+                 fprintf(arq, "mergesort, ordenado, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+                fprintf(arq, "mergesort, inverso, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+
+
+        }
+        if(tipo == 6)
+        {
+
+                 fprintf(arq, "heapsort, randomico, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+                 fprintf(arq, "heapsort, ordenado, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+                fprintf(arq, "heapsort, inverso, %d, %ul, %ul, %f\n", tam, troca, comp, tempo);
+
+
+        }
+}
