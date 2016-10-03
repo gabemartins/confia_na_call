@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define TAM 10000
+#define TAM 9600
 
 typedef struct estrutura
 {
@@ -16,7 +16,7 @@ int main()
     ESTRUTURA array[TAM];
 
     char buffer[10];
-    int i,j;
+    int i, j;
 
 
     banco = fopen("dados-alinhados.txt", "r");
@@ -31,7 +31,7 @@ int main()
         fread(buffer, sizeof(char), 4, banco);
         array[i].ano = atoi(buffer);
 
-        for(j=0;j<=10;j++){
+        for(j=0; j<=10; j++){
             buffer[j] = 0;
         }
     }
