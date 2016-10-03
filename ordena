@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
 void ins_direta(int C[], int tam, int *comp, int *troca, float ck);
 void ins_direta_bb(int n, int vetbb[], int *comp, int *troca, float ck);
@@ -12,24 +13,32 @@ void heapsort(int a[], int n, int *comp, int *troca, float ck);
 void ordena(int tam, int ordem, int tipo);
 void escreve(int tam, int ordem, int tipo, float tempo, int comp, int troca);
 
-FILE *arq;
+typedef struct estrutura
+{
+    int valor;
+    int municipio;
+    int ano;
+
+} ESTRUTURA;
+
+FILE *result;
 
 int main()
 {
     int i, j;
-    arq = fopen("resultados_confia_na_call.txt", "a");
+    result = fopen("resultados_confia_na_call.txt", "a");
 
     for(i=0; i<7; i++)
+    {
         for(j=0; j<3; j++)
         {
             ordena(100, j, i);
             ordena(1000, j, i);
             ordena(10000, j, i);
-            //ordena(1000000, j, i);
-            //ordena(10000000, j, i);
         }
+    }
 
-    fclose(arq);
+    fclose(result);
 
     return 0;
 }
@@ -472,5 +481,3 @@ void escreve(int tam, int ordem, int tipo, float tempo, int comp, int troca)
             }
         }
 }
-
-
