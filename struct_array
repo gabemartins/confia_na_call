@@ -8,39 +8,63 @@ typedef struct estrutura
     int valor;
     int municipio;
     int ano;
+
 } ESTRUTURA;
 
 int main()
 {
     FILE *banco;
+    FILE *arq;
     ESTRUTURA array[TAM];
 
-    char buffer[10];
-    int i, j;
+    char buffer[20];
+    int i,j;
 
 
     banco = fopen("dados-alinhados.txt", "r");
+    if (!banco){
+        printf("Erro ao abrir o arquivo!");
+        return -1;
+    }
 
     for(i=0; i<TAM; i++){
         fread(buffer, sizeof(char), 1, banco);
         array[i].valor = atoi(buffer);
 
+        for(j=0;j<=20;j++)
+            buffer[j] = 0;
+
         fread(buffer, sizeof(char), 6, banco);
         array[i].municipio = atoi(buffer);
+
+        for(j=0;j<=20;j++)
+            buffer[j] = 0;
 
         fread(buffer, sizeof(char), 4, banco);
         array[i].ano = atoi(buffer);
 
-        for(j=0; j<=10; j++){
+        for(j=0;j<=20;j++)
             buffer[j] = 0;
-        }
     }
 
 
     // Teste
-    // printf ("%d",array[9618].ano);
+    // printf ("%d",array[46].valor);
+
 
     fclose(banco);
 
-    return(0);
+    arq = fopen("banco_de_dados.bin", "wb");
+    if(!arq){
+        printf("Erro ao criar o arquivo!");
+        return -1;
+    }
+
+    for(i=0; i<TAM; i++){
+        fwrite(array, sizeof(array[i]), 1, arq);
+    }
+
+    fclose(arq);
+
+    return 0;
 }
