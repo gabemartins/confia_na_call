@@ -1,0 +1,46 @@
+#include <stdio.h>
+#include <string.h>
+
+#define TAM 10000
+
+typedef struct estrutura
+{
+    int valor;
+    int municipio;
+    int ano;
+} ESTRUTURA;
+
+int main()
+{
+    FILE *banco;
+    ESTRUTURA array[TAM];
+
+    char buffer[10];
+    int i,j;
+
+
+    banco = fopen("dados-alinhados.txt", "r");
+
+    for(i=0; i<TAM; i++){
+        fread(buffer, sizeof(char), 1, banco);
+        array[i].valor = atoi(buffer);
+
+        fread(buffer, sizeof(char), 6, banco);
+        array[i].municipio = atoi(buffer);
+
+        fread(buffer, sizeof(char), 4, banco);
+        array[i].ano = atoi(buffer);
+
+        for(j=0;j<=10;j++){
+            buffer[j] = 0;
+        }
+    }
+
+
+    // Teste
+    // printf ("%d",array[9618].ano);
+
+    fclose(banco);
+
+    return(0);
+}
