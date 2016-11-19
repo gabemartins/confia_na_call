@@ -115,7 +115,7 @@ trie* CriaTRIE()
 
 
     arqbin = fopen("banco_de_dados.bin", "rb"); /// MUDAR O ARQUIVO
-    while(i < 9600)
+    while(i < 96)
     {
         fseek(arqbin, sizeof(ESTRUTURA)*i, SEEK_SET);
         fread(cidade, sizeof(ESTRUTURA), 1, arqbin);
