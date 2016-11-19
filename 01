@@ -1,0 +1,182 @@
+#include <stdio.h>
+
+
+
+
+typedef struct estrutura
+{
+    int valor;
+    int municipio;
+    int ano;
+
+} ESTRUTURA;
+
+struct trie // Arvore trie de busca
+{
+    struct trie *(alfabeto[10]);
+    int end;
+};
+typedef struct trie trie;
+
+
+// Salva a Trie em um arquivo binario
+int SalvaTRIE (trie *nodoarv, FILE *arq)
+{
+    int i,j;
+
+    fwrite(nodoarv,sizeof(trie), 1, arq);
+    printf("F ");
+
+    for(i=0;i<=9;i++)
+    {
+        if (nodoarv->alfabeto[i] == NULL)
+        {
+            j=0; // #DeixaPraQuemSabe
+            printf("N ");
+        }
+        else
+        {
+            printf("E");
+            SalvaTRIE(nodoarv, arq);
+
+        }
+
+    }
+    }
+
+trie* AddNodoTRIE()
+{
+    trie *novo;
+    int j=0;
+    novo = (trie*)malloc(sizeof(trie));
+    novo->end=-1;
+    while (j<10)
+    {
+        novo->alfabeto[j]=NULL;
+        j++;
+    }
+
+    return novo;
+}
+
+// Função que separa o número do municipio em um array
+void DesfazNumero(int palavra[6], int n)
+{
+
+    palavra[0] = n/100000;
+    n = n-palavra[0]*100000;
+    palavra[1] = n/10000;
+    n = n-palavra[1]*10000;
+    palavra[2] = n/1000;
+    n = n-palavra[2]*1000;
+    palavra[3] = n/100;
+    n = n-palavra[3]*100;
+    palavra[4] = n/10;
+    n = n-palavra[4]*10;
+    palavra[5] = n;
+
+}
+
+// Função que adiciona um nodo na árvore.
+void AdicionaNaTRIE(trie *arv, int palavra[], int endereco)
+{
+    trie *arv_aux = arv;
+    int caractere;
+    int i=0;
+    while(i<6)
+    {
+        caractere = palavra[i];
+        if ( arv_aux->alfabeto[caractere] == NULL)
+        {
+            arv_aux->alfabeto[caractere] = AddNodoTRIE();
+        }
+        arv_aux = arv_aux->alfabeto[caractere];
+        i++;
+    }
+    arv_aux->end = endereco;
+}
+
+//Função que cria uma árvore.
+trie* CriaTRIE()
+{
+    FILE *arqbin;
+    ESTRUTURA* cidade;
+    trie *arv;
+    int end, i = 0, j=0, palavra[6];
+
+    cidade = (ESTRUTURA*)malloc(sizeof(ESTRUTURA));
+    arv = (trie*)malloc(sizeof(trie));
+    arv->end = -1;
+    while (j<10)
+    {
+        arv->alfabeto[j]=NULL;
+        j++;
+    }
+
+
+    arqbin = fopen("banco_de_dados.bin", "rb"); /// MUDAR O ARQUIVO
+    while(i < 9600)
+    {
+        fseek(arqbin, sizeof(ESTRUTURA)*i, SEEK_SET);
+        fread(cidade, sizeof(ESTRUTURA), 1, arqbin);
+        end = i *sizeof(ESTRUTURA);
+        DesfazNumero(palavra,cidade->municipio);
+        AdicionaNaTRIE(arv, palavra, end);
+        i++;
+
+    }
+
+    fclose(arqbin);
+
+    return arv;
+}
+
+//Função que pesquisa um nome em uma árvore e devolve a posição da estrutura no arquivo. (Se não existir ele retorna -1)
+int PesquisaNaTRIE(trie *arv, int palavra[6])
+{
+    trie *arv_aux = arv;
+    int i=0;
+    while(i < 6)
+    {
+        if(arv_aux->alfabeto[palavra[i]] == NULL)
+            return -1;
+        arv_aux = arv_aux->alfabeto[palavra[i]];
+        i++;
+    }
+    if(arv_aux->end == -1)
+        return -1; // retorna -1 quando não encontra
+    return arv_aux->end;
+}
+
+
+int main()
+{
+    trie *arv;
+    FILE *arq;
+    int n, idcidade[6], endereco;
+
+    arv = CriaTRIE();
+
+
+    printf("diga o ID da cidade ");
+    scanf("%d", &n);
+    DesfazNumero(idcidade, n);
+    endereco = PesquisaNaTRIE(arv, idcidade);
+
+    printf("%d", endereco);
+
+
+
+    //arq = fopen("triehard.bin", "wb");
+    //if (!arq)
+    //{
+       // printf("Erro ao abrir o arquivo!");
+        //return -1;
+   // }
+    //printf("criou");
+    //SalvaTRIE (arv, arq);
+
+    //fclose(arq);
+
+    return 0;
+}
