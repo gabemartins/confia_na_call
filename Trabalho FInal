@@ -1,0 +1,466 @@
+#include <stdio.h>
+#include <string.h>
+#define TAM 9600
+
+
+
+typedef struct estrutura
+{
+    int valor;
+    int municipio;
+    int ano;
+
+} ESTRUTURA;
+
+struct trie // Arvore trie de busca
+{
+    struct trie *(alfabeto[10]);
+    int end;
+};
+typedef struct trie trie;
+
+
+// Salva a Trie em um arquivo binario
+int SalvaTRIE (trie *nodoarv, FILE *arq)
+{
+    int i,j;
+
+    fwrite(nodoarv,sizeof(trie), 1, arq);
+    //printf("F ");
+
+    for(i=0; i<=9; i++)
+    {
+        if (nodoarv->alfabeto[i] == NULL)
+        {
+            j=0; // #DeixaPraQuemSabe
+            //printf("N ");
+        }
+        else
+        {
+            //printf("E");
+            SalvaTRIE(nodoarv->alfabeto[i], arq);
+
+        }
+
+    }
+}
+
+trie* AddNodoTRIE()
+{
+    trie *novo;
+    int j=0;
+    novo = (trie*)malloc(sizeof(trie));
+    novo->end=-1;
+    while (j<10)
+    {
+        novo->alfabeto[j]=NULL;
+        j++;
+    }
+
+    return novo;
+}
+
+// Funcao que separa o numero do municipio em um array
+void DesfazNumeroId(int palavra[6], int n)
+{
+
+
+    palavra[0] = n/100000;
+    n = n-palavra[0]*100000;
+    palavra[1] = n/10000;
+    n = n-palavra[1]*10000;
+    palavra[2] = n/1000;
+    n = n-palavra[2]*1000;
+    palavra[3] = n/100;
+    n = n-palavra[3]*100;
+    palavra[4] = n/10;
+    n = n-palavra[4]*10;
+    palavra[5] = n;
+
+}
+
+void DesfazNumeroAno(int palavra[4], int n)
+{
+
+    palavra[0] = n/1000;
+    n = n-palavra[0]*1000;
+    palavra[1] = n/100;
+    n = n-palavra[1]*100;
+    palavra[2] = n/10;
+    n = n-palavra[2]*10;
+    palavra[3] = n;
+
+}
+
+
+// Funcao que adiciona um nodo na arvore.
+void AdicionaNaTRIE(trie *arv, int palavra[], int endereco)
+{
+    trie *arv_aux = arv;
+    int caractere;
+    int i=0, u=0;
+
+
+
+    while(i<10)
+    {
+        caractere = palavra[i];
+        if ( arv_aux->alfabeto[caractere] == NULL)
+        {
+            arv_aux->alfabeto[caractere] = AddNodoTRIE();
+        }
+        arv_aux = arv_aux->alfabeto[caractere];
+        i++;
+    }
+    arv_aux->end = endereco;
+}
+
+//Fucao que cria uma Arvore.
+trie* CriaTRIE()
+{
+    FILE *arqbin;
+    ESTRUTURA* cidade;
+    trie *arv;
+    int end, i = 0, j=0, id[6], ano[4], palavra[10];
+
+    cidade = (ESTRUTURA*)malloc(sizeof(ESTRUTURA));
+    arv = (trie*)malloc(sizeof(trie));
+    arv->end = -1;
+    while (j<10)
+    {
+        arv->alfabeto[j]=NULL;
+        j++;
+    }
+
+
+    arqbin = fopen("banco_de_dados.bin", "rb");
+    if(!arqbin)
+    {
+        return NULL;
+    }
+
+    while(i < 9600)
+    {
+        fseek(arqbin, sizeof(ESTRUTURA)*i, SEEK_SET);
+        fread(cidade, sizeof(ESTRUTURA), 1, arqbin);
+        end = i *sizeof(ESTRUTURA);
+        DesfazNumeroId(id, cidade->municipio );
+        DesfazNumeroAno(ano, cidade->ano);
+        palavra[0] = id[0];
+        palavra[1] = id[1];
+        palavra[2] = id[2];
+        palavra[3] = id[3];
+        palavra[4] = id[4];
+        palavra[5] = id[5];
+        palavra[6] = ano[0];
+        palavra[7] = ano[1];
+        palavra[8] = ano[2];
+        palavra[9] = ano[3];
+        AdicionaNaTRIE(arv, palavra, end);
+        i++;
+
+    }
+
+    fclose(arqbin);
+
+    return arv;
+}
+
+//Funcao que pesquisa um nome em uma arvore e devolve a posicao da estrutura no arquivo. (Se nao existir ele retorna -1)
+int PesquisaNaTRIE(trie *arv, int palavra[10])
+{
+    trie *arv_aux = arv;
+    int i=0;
+    while(i < 10)
+    {
+        if(arv_aux->alfabeto[palavra[i]] == NULL)
+            return -1;
+        arv_aux = arv_aux->alfabeto[palavra[i]];
+        i++;
+    }
+    if(arv_aux->end == -1)
+        return -1; // retorna -1 quando nao encontra
+    return arv_aux->end;
+}
+
+int AchaValor(trie *arv)
+{
+    int anoa[4], ida[6], id, ano, endereco, palavra[10], u=0;
+    ESTRUTURA *cidade;
+    FILE* arq;
+
+    cidade = (ESTRUTURA*)malloc(sizeof(ESTRUTURA));
+
+    printf("\n Entre com o ID da cidade: ");
+    scanf("%d", &id);
+    printf(" Entre com o ano: ");
+    scanf("%d", &ano);
+    DesfazNumeroId(ida, id );
+    DesfazNumeroAno(anoa, ano);
+    palavra[0] = ida[0];
+    palavra[1] = ida[1];
+    palavra[2] = ida[2];
+    palavra[3] = ida[3];
+    palavra[4] = ida[4];
+    palavra[5] = ida[5];
+    palavra[6] = anoa[0];
+    palavra[7] = anoa[1];
+    palavra[8] = anoa[2];
+    palavra[9] = anoa[3];
+
+
+    endereco = PesquisaNaTRIE(arv, palavra);
+    if(endereco<0)
+    {
+        return -1;
+    }
+
+    arq = fopen("banco_de_dados.bin", "rb");
+
+    fseek(arq, endereco, SEEK_SET);
+    fread(cidade, sizeof(ESTRUTURA), 1, arq);
+
+    fclose(arq);
+    u=0;
+
+    printf("\n");
+    return (cidade->valor);
+
+}
+
+
+void shellSort(ESTRUTURA vet[], int size)
+{
+    int i, j, value;
+    int gap = 1;
+    ESTRUTURA aux;
+
+    while(gap < size)
+    {
+        gap = 3*gap+1;
+    }
+    while ( gap > 1)
+    {
+        gap /= 3;
+        for(i = gap; i < size; i++)
+        {
+            value = vet[i].municipio;
+            aux = vet[i];
+            j = i - gap;
+            while (j >= 0 && value < vet[j].municipio)
+            {
+                vet [j + gap] = vet[j];
+                j -= gap;
+            }
+            vet [j + gap] = aux;
+        }
+    }
+}
+
+void shellSortContrario(ESTRUTURA vet[], int size)
+{
+    int i, j, value;
+    int gap = 1;
+    ESTRUTURA aux;
+
+    while(gap < size)
+    {
+        gap = 3*gap+1;
+    }
+    while ( gap > 1)
+    {
+        gap /= 3;
+        for(i = gap; i < size; i++)
+        {
+            value = vet[i].municipio;
+            aux = vet[i];
+            j = i - gap;
+            while (j >= 0 && value > vet[j].municipio)
+            {
+                vet [j + gap] = vet[j];
+                j -= gap;
+            }
+            vet [j + gap] = aux;
+        }
+    }
+}
+
+void CriaArquivo()
+{
+    FILE *banco;
+    FILE *arq;
+    ESTRUTURA array_gigante[TAM], k;
+
+    char buffer[20];
+    int i,j;
+
+
+    banco = fopen("dados-alinhados.txt", "r");
+    if (!banco)
+    {
+        printf("Erro ao abrir o arquivo!");
+        return -1;
+    }
+
+    for(i=0; i<TAM; i++)
+    {
+        fread(buffer, sizeof(char), 1, banco);
+        array_gigante[i].valor = atoi(buffer);
+
+        for(j=0; j<=20; j++)
+            buffer[j] = 0;
+
+        fread(buffer, sizeof(char), 6, banco);
+        array_gigante[i].municipio = atoi(buffer);
+
+        for(j=0; j<=20; j++)
+            buffer[j] = 0;
+
+        fread(buffer, sizeof(char), 4, banco);
+        array_gigante[i].ano = atoi(buffer);
+
+        for(j=0; j<=20; j++)
+            buffer[j] = 0;
+    }
+
+    fclose(banco);
+
+    arq = fopen("banco_de_dados.bin", "wb");
+    if(!arq)
+    {
+        printf("Erro ao criar o arquivo!");
+        return -1;
+    }
+
+    fwrite(array_gigante, sizeof(ESTRUTURA), TAM, arq);
+
+
+    fclose(arq);
+
+    return 0;
+}
+
+int menu(trie *arv)
+{
+    int op, valor;
+    FILE *arq;
+    ESTRUTURA Array_Gigante[TAM];
+
+    while(1)
+    {
+
+        printf(" ------------------- Menu -----------------------\n");
+        printf("| 0: Criar banco de dados                        |\n");
+        printf("| 1: Pesquisar campus ativos                     |\n");
+        printf("| 2: Ordenar banco de dados em ordem crescente   |\n");
+        printf("| 3: Ordenar banco de dados em ordem decrescente |\n");
+        printf("| 4: Sair                                        |\n");
+        printf(" ------------------------------------------------");
+        printf("\n- Entre com uma opcao: ");
+        scanf("%d",&op);
+
+        switch(op)
+        {
+        case 0:
+            CriaArquivo();
+            arv = CriaTRIE();
+            arq = fopen("triehard.bin", "wb");
+            if (!arq)
+            {
+                printf(" Erro ao criar o arquivo!");
+                return -1;
+            }
+            SalvaTRIE(arv, arq);
+            fclose(arq);
+            printf(" Banco de dados criado com sucesso.");
+            getch();
+            break;
+        case 1:
+            valor = AchaValor(arv);
+            if(valor<0)
+                printf("\n Municipio nao encontrado.");
+            else
+                printf(" A quantidade de campus ativos e: %d", valor);
+            getch();
+            break;
+        case 2:
+            arq = fopen("banco_de_dados.bin", "rb");
+            if(!arq)
+            {
+                printf(" Erro ao ler o arquivo!");
+                return -1;
+            }
+            fread(Array_Gigante, sizeof(ESTRUTURA), TAM, arq);
+            fclose(arq);
+            shellSort(Array_Gigante, TAM);
+            arq = fopen(" Banco_de_dados.bin", "wb");
+            if(!arq)
+            {
+                printf(" Erro ao criar o arquivo!");
+                return -1;
+            }
+            fwrite(Array_Gigante, sizeof(ESTRUTURA), TAM, arq);
+            fclose(arq);
+            arv = CriaTRIE();
+            arq = fopen("triehard.bin", "wb");
+            if (!arq)
+            {
+                printf(" Erro ao abrir o arquivo!");
+                return -1;
+            }
+            SalvaTRIE(arv, arq);
+            fclose(arq);
+            printf(" Banco de dados ordenado com sucesso.");
+            getch();
+            break;
+        case 3:
+            arq = fopen("banco_de_dados.bin", "rb");
+            if(!arq)
+            {
+                printf(" Erro ao ler o arquivo!");
+                return -1;
+            }
+            fread(Array_Gigante, sizeof(ESTRUTURA), TAM, arq);
+            fclose(arq);
+            shellSortContrario(Array_Gigante, TAM);
+            arq = fopen(" Banco_de_dados.bin", "wb");
+            if(!arq)
+            {
+                printf(" Erro ao criar o arquivo!");
+                return -1;
+            }
+            fwrite(Array_Gigante, sizeof(ESTRUTURA), TAM, arq);
+            fclose(arq);
+            arv = CriaTRIE();
+            printf(" Banco de dados ordenado com sucesso.");
+            getch();
+            break;
+        case 4:
+            printf("\n Finalizando..\n");
+            return 1;
+            break;
+        default:
+            printf("\n Opcao invalida..\n");
+            getch();
+            break;
+        }
+        system("cls");
+    }
+    return 0;
+}
+
+
+int main()
+{
+    trie *arv;
+    FILE *arq;
+    int id, ano, ida[6], anoa[4], n, palavra[10], endereco;
+
+    arv = CriaTRIE();
+    menu(arv);
+
+
+    return 0;
+    getch();
+}
+
