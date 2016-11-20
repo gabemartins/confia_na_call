@@ -393,7 +393,7 @@ int menu(trie *arv)
             fread(Array_Gigante, sizeof(ESTRUTURA), TAM, arq);
             fclose(arq);
             shellSort(Array_Gigante, TAM);
-            arq = fopen(" Banco_de_dados.bin", "wb");
+            arq = fopen("banco_de_dados.bin", "wb");
             if(!arq)
             {
                 printf(" Erro ao criar o arquivo!");
@@ -405,7 +405,7 @@ int menu(trie *arv)
             arq = fopen("triehard.bin", "wb");
             if (!arq)
             {
-                printf(" Erro ao abrir o arquivo!");
+                printf(" Erro ao criar o arquivo!");
                 return -1;
             }
             SalvaTRIE(arv, arq);
@@ -423,7 +423,7 @@ int menu(trie *arv)
             fread(Array_Gigante, sizeof(ESTRUTURA), TAM, arq);
             fclose(arq);
             shellSortContrario(Array_Gigante, TAM);
-            arq = fopen(" Banco_de_dados.bin", "wb");
+            arq = fopen("banco_de_dados.bin", "wb");
             if(!arq)
             {
                 printf(" Erro ao criar o arquivo!");
