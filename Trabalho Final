@@ -139,7 +139,7 @@ trie* CriaTRIE()
         return NULL;
     }
 
-    while(i < 9600)
+    while(i < TAM)
     {
         fseek(arqbin, sizeof(ESTRUTURA)*i, SEEK_SET);
         fread(cidade, sizeof(ESTRUTURA), 1, arqbin);
